@@ -61,20 +61,15 @@ const checkLogin = (req, res, next) => {
 app.post("/api/login", (req, res) => {
   const { email, password } = req.body || {};
   if (!email || !password) {
-    res.status(400).send({
-      message: "Email and password are required!",
-    });
-    return;
+    return res
+      .status(400)
+      .send({ message: "Email and password are required!" });
   }
   const user = users.find(
     (user) => user.email == email && user.password == password
   );
-  if (!user) {
-    res.status(401).send({
-      message: "Email or password is incorrect!",
-    });
-    return;
-  }
+  if (!user)
+    return res.status(401).send({ message: "Email or password is incorrect!" });
   isLoggedIn = true;
   res.send({ message: "Success logined" });
 });
@@ -82,19 +77,13 @@ app.post("/api/login", (req, res) => {
 // --------------------------Register------------------------------------
 app.post("/api/register", (req, res) => {
   const { name, surname, age, email, password } = req.body || {};
-  if (!name || !surname || !age || !email || !password) {
-    res.status(400).send({
+  if (!name || !surname || !age || !email || !password)
+    return res.status(400).send({
       message: "Name, surname, email, password and age are required!",
     });
-    return;
-  }
   let user = users.find((user) => user.email == email);
-  if (user) {
-    res.status(409).send({
-      message: "Email address is already in use",
-    });
-    return;
-  }
+  if (user)
+    return res.status(409).send({ message: "Email address is already in use" });
   let newUser = {
     name,
     surname,
@@ -142,12 +131,12 @@ app.put(
   (req, res) => {
     const { id } = req.params;
     const { name, surname, age } = req.body;
-    let user = users.find((p) => p.id === id);
-    if (!user) return res.status(204).send();
     if (!name && !surname && !age)
       return res
         .status(400)
         .send({ message: "Name or surname or age required!" });
+    let user = users.find((p) => p.id === id);
+    if (!user) return res.status(204).send();
     if (name) user.name = name;
     if (surname) user.surname = surname;
     if (age) user.age = age;
@@ -170,10 +159,6 @@ app.delete(
     });
   }
 );
-
-app.listen(PORT, () => {
-  console.log(`listening on port ${PORT}`);
-});
 
 // ----------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------
@@ -232,3 +217,24 @@ app.post(
     res.status(201).send({ message: "Post successfully added!", newPost });
   }
 );
+
+// --------------------------Post Update------------------------------------
+app.put(
+  "/api/posts/:id",
+  // (req, res, next) => checkLogin(req, res, next),
+  (req, res) => {
+    const { description } = req.body || {};
+    const { id } = req.params;
+    if (!description)
+      return res.status(400).send({ message: "Description are required!" });
+    let post = posts.find((p) => p.id == id);
+    if (!post) return res.status(204).send();
+    if (description) post.description = description;
+
+    res.status(201).send({ message: "Post successfully update!", post });
+  }
+);
+
+app.listen(PORT, () => {
+  console.log(`listening on port ${PORT}`);
+});
