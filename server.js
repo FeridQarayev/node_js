@@ -153,10 +153,7 @@ app.delete(
     let userIndex = users.findIndex((p) => p.id === id);
     if (userIndex === -1) return res.status(204).send();
     let deletedUser = users.splice(userIndex, 1);
-    res.send({
-      message: "User successfully deleted!",
-      deletedUser,
-    });
+    res.send({ message: "User successfully deleted!", deletedUser });
   }
 );
 
@@ -221,7 +218,7 @@ app.post(
 // --------------------------Post Update------------------------------------
 app.put(
   "/api/posts/:id",
-  // (req, res, next) => checkLogin(req, res, next),
+  (req, res, next) => checkLogin(req, res, next),
   (req, res) => {
     const { description } = req.body || {};
     const { id } = req.params;
@@ -232,6 +229,19 @@ app.put(
     if (description) post.description = description;
 
     res.status(201).send({ message: "Post successfully update!", post });
+  }
+);
+
+// --------------------------Post Delete ------------------------------------
+app.delete(
+  "/api/posts/:id",
+  (req, res, next) => checkLogin(req, res, next),
+  (req, res) => {
+    const { id } = req.params;
+    let postIndex = posts.findIndex((p) => p.id === id);
+    if (postIndex === -1) return res.status(204).send();
+    let deletedPost = posts.splice(postIndex, 1);
+    res.send({ message: "Post successfully deleted!", deletedPost });
   }
 );
 
