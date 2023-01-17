@@ -56,6 +56,18 @@ app.put("/api/users/:id", (req, res) => {
   res.send({ message: "User successfully updated!", user });
 });
 
+// --------------------------User Delete ------------------------------------
+app.delete("/api/users/:id", (req, res) => {
+  const { id } = req.params;
+  let userIndex = users.findIndex((p) => p.id === id);
+  if (userIndex === -1) return res.status(204).send();
+  let deletedUser = users.splice(userIndex, 1);
+  res.send({
+    message: "User successfully deleted!",
+    deletedUser,
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
 });
