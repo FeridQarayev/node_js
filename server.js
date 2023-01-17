@@ -83,6 +83,16 @@ app.post("/api/register", (req, res) => {
   res.status(201).send({ message: "User successfully registered!", newUser });
 });
 
+// --------------------------Logout------------------------------------
+app.post(
+  "/api/logout",
+  (req, res, next) => checkLogin(req, res, next),
+  (req, res) => {
+    isLoggedIn = false;
+    res.send({ message: "Success logouted" });
+  }
+);
+
 // --------------------------Get All Users------------------------------------
 app.get("/api/users", (req, res) => {
   res.send({ message: "success", users });
