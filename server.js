@@ -23,6 +23,31 @@ const users = [
     password: "Akif1234",
   },
 ];
+
+const posts = [
+  {
+    id: "1",
+    description: "Ogru yolu dogru yolu",
+    createdOn: "18.01.2023",
+    user: {
+      id: "2",
+      name: "Alakisi",
+      surname: "Baxiseliyev",
+      email: "code2@gamil.com",
+    },
+  },
+  {
+    id: "2",
+    description: "Ata min esseye catinca",
+    createdOn: "19.01.2023",
+    user: {
+      id: "2",
+      name: "Alakisi",
+      surname: "Baxiseliyev",
+      email: "code1@gamil.com",
+    },
+  },
+];
 let isLoggedIn = false;
 
 const checkLogin = (req, res, next) => {
@@ -148,4 +173,24 @@ app.delete(
 
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
+});
+
+// ----------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
+
+// --------------------------Get All Posts------------------------------------
+app.get("/api/posts", (req, res) => {
+  res.send({ message: "success", posts });
+});
+
+// --------------------------Get Post As Id------------------------------------
+app.get("/api/posts/:id", (req, res) => {
+  const { id } = req.params;
+  let post = posts.find((p) => p.id === id);
+  if (post) {
+    res.send({
+      message: "success",
+      post,
+    });
+  } else res.status(204).send();
 });
