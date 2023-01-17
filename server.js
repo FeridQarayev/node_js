@@ -4,7 +4,6 @@ const PORT = 8080;
 
 const app = express();
 app.use(express.json());
-let isLoggedIn = false;
 
 const users = [
   {
@@ -21,10 +20,41 @@ const users = [
     surname: "Baxiseliyev",
     age: 31,
     email: "code2@gamil.com",
-    password: "Akif123",
+    password: "Akif1234",
   },
 ];
+let isLoggedIn = false;
 
+const checkLogin = (req, res, next) => {
+  if (!isLoggedIn) {
+    return res.status(401).send({ message: "You must login!" });
+  }
+  next();
+};
+
+// --------------------------Login------------------------------------
+app.post("/api/login", (req, res) => {
+  const { email, password } = req.body || {};
+  if (!email || !password) {
+    res.status(400).send({
+      message: "Email and password are required!",
+    });
+    return;
+  }
+  const user = users.find(
+    (user) => user.email == email && user.password == password
+  );
+  if (!user) {
+    res.status(401).send({
+      message: "Email or password is incorrect!",
+    });
+    return;
+  }
+  isLoggedIn = true;
+  res.send({ message: "Success logined" });
+});
+
+// --------------------------Register------------------------------------
 app.post("/api/register", (req, res) => {
   const { name, surname, age, email, password } = req.body || {};
   if (!name || !surname || !age || !email || !password) {
@@ -33,8 +63,8 @@ app.post("/api/register", (req, res) => {
     });
     return;
   }
-  let user = users.filter((user) => user.email == email);
-  if (user.length > 0) {
+  let user = users.find((user) => user.email == email);
+  if (user) {
     res.status(409).send({
       message: "Email address is already in use",
     });
@@ -50,7 +80,7 @@ app.post("/api/register", (req, res) => {
   };
   users.push(newUser);
 
-  res.status(201).send({ message: "User successfully added!", newUser });
+  res.status(201).send({ message: "User successfully registered!", newUser });
 });
 
 // --------------------------Get All Users------------------------------------
@@ -71,32 +101,40 @@ app.get("/api/users/:id", (req, res) => {
 });
 
 // --------------------------User Update ------------------------------------
-app.put("/api/users/:id", (req, res) => {
-  const { id } = req.params;
-  const { name, surname, age } = req.body;
-  let user = users.find((p) => p.id === id);
-  if (!user) return res.status(204).send();
-  if (!name && !surname && !age)
-    return res
-      .status(400)
-      .send({ message: "Name or surname or age required!" });
-  if (name) user.name = name;
-  if (surname) user.surname = surname;
-  if (age) user.age = age;
-  res.send({ message: "User successfully updated!", user });
-});
+app.put(
+  "/api/users/:id",
+  (req, res, next) => checkLogin(req, res, next),
+  (req, res) => {
+    const { id } = req.params;
+    const { name, surname, age } = req.body;
+    let user = users.find((p) => p.id === id);
+    if (!user) return res.status(204).send();
+    if (!name && !surname && !age)
+      return res
+        .status(400)
+        .send({ message: "Name or surname or age required!" });
+    if (name) user.name = name;
+    if (surname) user.surname = surname;
+    if (age) user.age = age;
+    res.send({ message: "User successfully updated!", user });
+  }
+);
 
 // --------------------------User Delete ------------------------------------
-app.delete("/api/users/:id", (req, res) => {
-  const { id } = req.params;
-  let userIndex = users.findIndex((p) => p.id === id);
-  if (userIndex === -1) return res.status(204).send();
-  let deletedUser = users.splice(userIndex, 1);
-  res.send({
-    message: "User successfully deleted!",
-    deletedUser,
-  });
-});
+app.delete(
+  "/api/users/:id",
+  (req, res, next) => checkLogin(req, res, next),
+  (req, res) => {
+    const { id } = req.params;
+    let userIndex = users.findIndex((p) => p.id === id);
+    if (userIndex === -1) return res.status(204).send();
+    let deletedUser = users.splice(userIndex, 1);
+    res.send({
+      message: "User successfully deleted!",
+      deletedUser,
+    });
+  }
+);
 
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
