@@ -22,6 +22,9 @@ const users = [
     password: "Akif123",
   },
 ];
+app.get("/api/users", (req, res) => {
+  res.send({ message: "success", users });
+});
 
 app.get("/api/users/:id", (req, res) => {
   const { id } = req.params;
