@@ -1,9 +1,10 @@
 const express = require("express");
-const { v4: uuidv } = require("uuid");
+const { v4: uuidv4 } = require("uuid");
 const PORT = 8080;
 
 const app = express();
 app.use(express.json());
+let isLoggedIn = false;
 
 const users = [
   {
@@ -11,7 +12,7 @@ const users = [
     name: "Alakisi",
     surname: "Baxiseliyev",
     age: 31,
-    email: "code@gamil.com",
+    email: "code1@gamil.com",
     password: "Akif123",
   },
   {
@@ -19,10 +20,39 @@ const users = [
     name: "Alakisi",
     surname: "Baxiseliyev",
     age: 31,
-    email: "code@gamil.com",
+    email: "code2@gamil.com",
     password: "Akif123",
   },
 ];
+
+app.post("/api/register", (req, res) => {
+  const { name, surname, age, email, password } = req.body || {};
+  if (!name || !surname || !age || !email || !password) {
+    res.status(400).send({
+      message: "Name, surname, email, password and age are required!",
+    });
+    return;
+  }
+  let user = users.filter((user) => user.email == email);
+  if (user.length > 0) {
+    res.status(409).send({
+      message: "Email address is already in use",
+    });
+    return;
+  }
+  let newUser = {
+    name,
+    surname,
+    age,
+    email,
+    password,
+    id: uuidv4(),
+  };
+  users.push(newUser);
+
+  res.status(201).send({ message: "User successfully added!", newUser });
+});
+
 // --------------------------Get All Users------------------------------------
 app.get("/api/users", (req, res) => {
   res.send({ message: "success", users });
