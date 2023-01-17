@@ -194,3 +194,41 @@ app.get("/api/posts/:id", (req, res) => {
     });
   } else res.status(204).send();
 });
+
+// --------------------------Post Create------------------------------------
+app.post(
+  "/api/posts",
+  (req, res, next) => checkLogin(req, res, next),
+  (req, res) => {
+    const { description, userId } = req.body || {};
+    if (!description || !userId) {
+      res.status(400).send({
+        message: "Description and userId are required!",
+      });
+      return;
+    }
+    let user = users.find((user) => user.id == userId);
+    if (!user) {
+      res.status(404).send({
+        message: "User not find!",
+      });
+      return;
+    }
+    const m = new Date();
+    const createdOn =
+      m.getUTCDate() + "/" + (m.getUTCMonth() + 1) + "/" + m.getUTCFullYear();
+    let newPost = {
+      id: uuidv4(),
+      description,
+      createdOn,
+      user: {
+        ...user,
+        password: undefined,
+        age: undefined,
+      },
+    };
+    posts.push(newPost);
+
+    res.status(201).send({ message: "Post successfully added!", newPost });
+  }
+);
